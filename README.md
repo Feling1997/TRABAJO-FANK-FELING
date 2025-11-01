@@ -1,2 +1,2 @@
-# TRABAJO-FANK-FELING
-PHP en equipo
+# BibliotecaPHP
+Sistema de Gestion de Biblioteca FANK - FELING
