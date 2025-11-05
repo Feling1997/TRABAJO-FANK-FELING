@@ -1,10 +1,14 @@
 <?php
-require "db.php";
+require "base_datos.php";
 session_start();
+
+if (!isset($_SESSION["usuario_id"])) {
+  header("Location: login.php");
+  exit;
+}
 
 if (isset($_GET["accion"])) {
   header("Content-Type: application/json");
-
 
   if ($_GET["accion"] === "listar") {
     $res = $pdo->query("SELECT * FROM usuarios ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
@@ -12,16 +16,10 @@ if (isset($_GET["accion"])) {
     exit;
   }
 
-
   if ($_GET["accion"] === "agregar") {
     $data = json_decode(file_get_contents("php://input"), true);
     $stmt = $pdo->prepare("INSERT INTO usuarios(nombre,email,pass,rol) VALUES (?,?,?,?)");
-    $stmt->execute([
-      $data["nombre"],
-      $data["email"],
-      $data["pass"],
-      $data["rol"]
-    ]);
+    $stmt->execute([$data["nombre"], $data["email"], $data["pass"], $data["rol"]]);
     echo json_encode(["ok" => true]);
     exit;
   }
@@ -29,13 +27,7 @@ if (isset($_GET["accion"])) {
   if ($_GET["accion"] === "editar") {
     $data = json_decode(file_get_contents("php://input"), true);
     $stmt = $pdo->prepare("UPDATE usuarios SET nombre=?, email=?, pass=?, rol=? WHERE id=?");
-    $stmt->execute([
-      $data["nombre"],
-      $data["email"],
-      $data["pass"],
-      $data["rol"],
-      $data["id"]
-    ]);
+    $stmt->execute([$data["nombre"], $data["email"], $data["pass"], $data["rol"], $data["id"]]);
     echo json_encode(["ok" => true]);
     exit;
   }
@@ -48,28 +40,50 @@ if (isset($_GET["accion"])) {
   }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>CRUD de Usuarios</title>
+  <meta charset="UTF-8">
+  <title>Gestión de Usuarios</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { background: #f4f4f4; font-family: Arial, sans-serif; }
+    .container { max-width: 850px; margin: 40px auto; background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+    h2 { text-align: center; margin-bottom: 20px; }
+    .form-row { margin: 10px 0; }
+    input, select, button { padding: 8px; margin-right: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 10px; border-bottom: 1px solid #ddd; }
+    th { background: #2c3e50; color: white; }
+    tr:hover { background: #ecf0f1; }
+    .acciones button { margin-right: 5px; cursor: pointer; }
+    .logout { text-align: right; margin-top: 10px; }
+    .logout a { color: #c0392b; text-decoration: none; font-weight: bold; }
+    .logout a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-<h2>Gestión de Usuarios del Sistema</h2>
+  <div class="container">
+    <h2>Gestión de Usuarios del Sistema</h2>
 
-<input id="id" type="hidden">
-<input id="nombre" placeholder="Nombre">
-<input id="email" placeholder="Email">
-<input id="pass" type="password" placeholder="Contraseña">
-<select id="rol">
-  <option value="admin">admin</option>
-  <option value="empleado">empleado</option>
-</select>
-<button onclick="guardar()">Guardar</button>
-<button onclick="cancelar()">Cancelar</button>
+    <div class="form-row">
+      <input id="id" type="hidden">
+      <input id="nombre" placeholder="Nombre">
+      <input id="email" placeholder="Email">
+      <input id="pass" type="password" placeholder="Contraseña">
+      <select id="rol">
+        <option value="empleado">empleado</option>
+      </select>
+      <button onclick="guardar()">Guardar</button>
+      <button onclick="cancelar()">Cancelar</button>
+    </div>
 
-<table border="1" id="tabla"></table>
+    <table id="tabla"></table>
+
+    <div class="logout">
+      <a href="logout.php">Cerrar sesión</a>
+    </div>
+  </div>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -78,15 +92,20 @@ let editando = false;
 async function listar() {
   const res = await fetch("?accion=listar");
   const data = await res.json();
-  let html = "<tr><th>ID</th><th>Nombre</th><th>Email</th><th>Contraseña</th><th>Rol</th><th>Acciones</th></tr>";
+  let html = `
+    <tr>
+      <th>ID</th><th>Nombre</th><th>Email</th>
+      <th>Contraseña</th><th>Rol</th><th>Acciones</th>
+    </tr>`;
   data.forEach(u => {
-    html += `<tr>
+    html += `
+    <tr>
       <td>${u.id}</td>
       <td>${u.nombre}</td>
       <td>${u.email}</td>
       <td>${u.pass}</td>
       <td>${u.rol}</td>
-      <td>
+      <td class="acciones">
         <button onclick='editar(${u.id},"${u.nombre}","${u.email}","${u.pass}","${u.rol}")'>Editar</button>
         <button onclick="eliminar(${u.id})">Eliminar</button>
       </td>
