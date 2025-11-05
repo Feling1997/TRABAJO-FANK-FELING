@@ -70,9 +70,12 @@ if (isset($_GET["accion"])) {
       <input id="id" type="hidden">
       <input id="nombre" placeholder="Nombre">
       <input id="email" placeholder="Email">
-      <input id="pass" type="password" placeholder="Contraseña">
-      <select id="rol">
-        <option value="empleado">empleado</option>
+      <input id="tel" placeholder="Teléfono">
+      <input id="dni" placeholder="DNI/Documento">
+      <input id="direccion" placeholder="Dirección">
+      <select id="estado">
+        <option value="activo">activo</option>
+        <option value="suspendido">suspendido</option>
       </select>
       <button onclick="guardar()">Guardar</button>
       <button onclick="cancelar()">Cancelar</button>
@@ -103,8 +106,9 @@ async function listar() {
       <td>${u.id}</td>
       <td>${u.nombre}</td>
       <td>${u.email}</td>
-      <td>${u.pass}</td>
-      <td>${u.rol}</td>
+      <td>${u.tel}</td>
+      <td>${u.direc}</td>
+      <td>${u.estado}</td>
       <td class="acciones">
         <button onclick='editar(${u.id},"${u.nombre}","${u.email}","${u.pass}","${u.rol}")'>Editar</button>
         <button onclick="eliminar(${u.id})">Eliminar</button>
@@ -119,8 +123,10 @@ async function guardar() {
     id: $("#id").value,
     nombre: $("#nombre").value,
     email: $("#email").value,
-    pass: $("#pass").value,
-    rol: $("#rol").value
+    tel: $("#telefono").value,
+    direc: $("#direccion").value
+    estado: $("#estado").value
+
   };
   const accion = editando ? "editar" : "agregar";
   await fetch(`?accion=${accion}`, {
@@ -131,12 +137,14 @@ async function guardar() {
   listar();
 }
 
-function editar(id, nombre, email, pass, rol) {
+function editar(id, nombre, email, tel, direc, estado) {
   $("#id").value = id;
   $("#nombre").value = nombre;
   $("#email").value = email;
-  $("#pass").value = pass;
-  $("#rol").value = rol;
+  $("#telefono").value = tel;
+  $("#direccion").value = direc;
+  $("#estado").value = "activo";
+
   editando = true;
 }
 
@@ -144,8 +152,10 @@ function cancelar() {
   $("#id").value = "";
   $("#nombre").value = "";
   $("#email").value = "";
-  $("#pass").value = "";
-  $("#rol").value = "empleado";
+  $("#dni").value = "";
+  $("#telefono").value = "";
+  $("#direccion").value = "";
+  $("#estado").value = "activo";
   editando = false;
 }
 
