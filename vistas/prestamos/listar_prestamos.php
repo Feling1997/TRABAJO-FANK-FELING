@@ -66,7 +66,7 @@ $prestamos = ControladorPrestamos::obtenerPrestamos($conexion);
                                                 <i class="bi bi-arrow-return-left"></i>
                                             </a>
                                         <?php endif; ?>
-                                        <a href="editar_prestamo.php?id=<?= $fila["id"] ?>" class="btn btn-outline-danger btn-sm"
+                                        <a href="eliminar_prestamo.php?id=<?= $fila["id"] ?>" class="btn btn-outline-danger btn-sm"
                                            onclick="return confirm('¿Seguro que deseas eliminar este préstamo?');">
                                             <i class="bi bi-trash"></i>
                                         </a>

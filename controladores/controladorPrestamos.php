@@ -22,12 +22,31 @@ class ControladorPrestamos {
 
     public static function agregarPrestamo($conexion, $libro_id, $usuario_id, $fecha_prestamo, $fecha_devolucion, $observaciones=null) {
         $mensaje = "";
-        $check = $conexion->prepare("SELECT id FROM prestamos WHERE libro_id = ? AND estado = 'activo' LIMIT 1");
-        $check->bind_param("i", $libro_id);
-        $check->execute();
-        $resultado = $check->get_result();
-        if ($resultado->num_rows > 0)
-            $mensaje = "El libro ya está prestado";
+        // 1. Obtener stock total del libro
+        $libro = $conexion->query("SELECT l.id, l.titulo FROM libros l LEFT JOIN (
+            SELECT libro_id, COUNT(*) AS prestados
+            FROM prestamos
+            WHERE estado = 'activo'
+            GROUP BY libro_id) AS p ON l.id = p.libro_id
+            WHERE COALESCE(p.prestados, 0) < l.stock");
+
+        $libro = $conexion->prepare("SELECT stock FROM libros WHERE id = ?");
+        $libro->bind_param("i", $libro_id);
+        $libro->execute();
+        $datosLibro = $libro->get_result()->fetch_assoc();
+        $stockTotal = $datosLibro ? (int)$datosLibro['stock'] : 0;
+
+
+        // 2. Contar préstamos activos del libro
+        $activos = $conexion->prepare("SELECT COUNT(*) AS total FROM prestamos WHERE libro_id = ? AND estado = 'activo'");
+        $activos->bind_param("i", $libro_id);
+        $activos->execute();
+        $cantActivos = $activos->get_result()->fetch_assoc()['total'];
+
+        // 3. Comparar cantidades
+        if ($cantActivos >= $stockTotal)
+            $mensaje = "Sin stock disponible para préstamo";
+
 
         if ($mensaje == "") {
             $consulta = "INSERT INTO prestamos (libro_id, usuario_id, fecha_prestamo, fecha_devolucion, observaciones, estado)
@@ -36,9 +55,12 @@ class ControladorPrestamos {
             $preparacion->bind_param("iisss", $libro_id, $usuario_id, $fecha_prestamo, $fecha_devolucion, $observaciones);
 
             if ($preparacion->execute()) {
-                $subir = $conexion->prepare("UPDATE libros SET estado='prestado' WHERE id=?");
-                $subir->bind_param("i", $libro_id);
-                $subir->execute();
+                $nuevoActivos = $cantActivos + 1;
+                if ($nuevoActivos >= $stockTotal) {
+                    $subir = $conexion->prepare("UPDATE libros SET estado='prestado' WHERE id=?");
+                    $subir->bind_param("i", $libro_id);
+                    $subir->execute();
+                }
                 $mensaje = "OK";
             } else {
                 $mensaje = "Error al agregar préstamo: " . $preparacion->error;
@@ -85,7 +107,7 @@ class ControladorPrestamos {
         $check->execute();
         $resultado = $check->get_result();
 
-        if($resultado->num_rows==0)
+        if($resultado->num_rows>0)
             $mensaje = "No se puede eliminar el prestamo activo";
         else{
             $preparacion=$conexion->prepare("DELETE FROM prestamos WHERE id=?");

@@ -4,7 +4,10 @@ include_once("../../controladores/controladorPrestamos.php");
 
 $mensaje = "";
 
-$libros = $conexion->query("SELECT id, titulo FROM libros WHERE estado='disponible'");
+$libros = $conexion->query("SELECT l.id, l.titulo FROM libros l LEFT JOIN (
+        SELECT libro_id, COUNT(*) AS prestados FROM prestamos WHERE estado = 'activo' GROUP BY libro_id) p ON l.id = p.libro_id
+    WHERE COALESCE(p.prestados, 0) < l.stock");
+
 $usuarios = $conexion->query("SELECT id, nombre_completo FROM usuarios WHERE estado='activo'");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -17,7 +20,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_POST["observaciones"]
     );
 
-    $mensaje = ($resultado == "OK") ? "El préstamo se ha agregado correctamente ✅" : $resultado;
+    if ($resultado == "OK") {
+        echo "
+        <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+        <div class='d-flex flex-column align-items-center justify-content-center vh-100 bg-light'>
+            <div class='alert alert-success text-center shadow p-4 w-50'>
+                <h4><i class='bi bi-check-circle-fill me-2'></i>Préstamo guardado correctamente</h4>
+                <p class='mb-0 text-muted'>Redirigiendo al listado...</p>
+                <div class='spinner-border text-success mt-3'></div>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => window.location.href = 'listar_prestamos.php', 1800);
+        </script>
+        ";
+        exit;
+    } else {
+        echo "
+        <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>
+        <div class='d-flex flex-column align-items-center justify-content-center vh-100 bg-light'>
+            <div class='alert alert-danger text-center shadow p-4 w-50'>
+                <h4><i class='bi bi-exclamation-triangle-fill me-2'></i>Error al guardar préstamo</h4>
+                <p class='mb-0'>" . htmlspecialchars($resultado) . "</p>
+                <a href='listar_prestamos.php' class='btn btn-secondary mt-3'>Volver al listado</a>
+            </div>
+        </div>
+        ";
+    }
 }
 ?>
 <!DOCTYPE html>
