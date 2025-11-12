@@ -1,7 +1,6 @@
 <?php
-require_once __DIR__ . '/../config/base_datos.php';
+require_once __DIR__ . '/../../config/base_datos.php';
 session_start();
-
 if (!isset($_SESSION["usuario_id"])) {
   header("Location: ../login.php");
   exit;
@@ -18,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["prestamo_id"])) {
   $prestamo_id = (int)($_POST["prestamo_id"] ?? 0);
 
   if ($prestamo_id <= 0) {
-    header("Location: devoluciones.php?error=ID de préstamo inválido");
+    header("Location: devolver.php?error=ID de préstamo inválido");
     exit;
   }
 
@@ -58,11 +57,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["prestamo_id"])) {
     $stmt->execute();
 
     $conexion->commit();
-    header("Location: devoluciones.php?ok=1");
+    header("Location: devolver.php?ok=1");
     exit;
   } catch (Exception $e) {
     $conexion->rollback();
-    header("Location: devoluciones.php?error=" . urlencode($e->getMessage()));
+    header("Location: devolver.php?error=" . urlencode($e->getMessage()));
     exit;
   }
 }
@@ -93,10 +92,15 @@ $prestamos = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
 </head>
 <body class="p-3 p-md-4">
   <div class="container">
+
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <h3 class="m-0">Devoluciones</h3>
-      <div class="ms-3" style="max-width: 280px;">
+      <div>
+        <h3 class="m-0">📗 Devoluciones</h3>
+        <small class="text-muted">Registrar la devolución de préstamos activos</small>
+      </div>
+      <div class="d-flex gap-2">
         <input type="text" id="q" class="form-control form-control-sm" placeholder="Buscar préstamo..." onkeyup="filtrar()">
+        <a href="index.php" class="btn btn-outline-secondary btn-sm">⬅ Volver a préstamos</a>
       </div>
     </div>
 
