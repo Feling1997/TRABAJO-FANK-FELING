@@ -20,7 +20,7 @@ $totalUsuarios = $conexion->query("SELECT COUNT(*) AS total FROM usuarios")->fet
     <class="text-center my-4">
         <a href="libros/listar_libros.php" class="btn btn-primary btn.lg m-2">📚 Ver Libros</a>
         <a href="prestamos/listar_prestamos.php" class="btn btn-success btn.lg m-2">📘 Ver Préstamos</a>
-        <a href="#" class="btn btn-warning btn.lg m-2 disabled">👤 Ver Usuarios</a>
+        <a href="Pablo/usuarios/index.php" class="btn btn-warning btn.lg m-2">👤 Ver Usuarios</a>
 
     <div class="row text-center mb-4">
         <div class="col-md-4">
