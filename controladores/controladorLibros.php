@@ -26,7 +26,7 @@ class ControladorLibros{
             $preparacion->bind_param("ssisiisss",$titulo,$autor,$anio,$genero,$stock,$isbn,$editorial,$categoria,$descripcion);
 
             if($preparacion->execute())
-                $mensje="Ok";
+                $mensaje="Ok";
             else
                 $mensaje="Error al insertar el libro".$preparacion->error;
         }
