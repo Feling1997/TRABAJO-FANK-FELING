@@ -65,10 +65,10 @@ if ($stmt2) {
       <div class="col-md-5">
         <div class="card shadow-sm h-100">
           <div class="card-body">
-            <h5 class="card-title mb-3"><?= htmlspecialchars($u['nombre']) ?></h5>
+            <h5 class="card-title mb-3"><?= htmlspecialchars($u['nombre_completo']) ?></h5>
             <p class="text-muted mb-1">DNI: <?= htmlspecialchars($u['dni']) ?></p>
             <p class="mb-1">Email: <?= htmlspecialchars($u['email']) ?></p>
-            <p class="mb-1">Tel: <?= htmlspecialchars($u['tel']) ?></p>
+            <p class="mb-1">Telefono: <?= htmlspecialchars($u['telefono']) ?></p>
             <p class="mb-1">Dirección: <?= htmlspecialchars($u['direccion']) ?></p>
             <p class="mb-0">Estado:
               <?php if ((string)$u['estado']==='1' || $u['estado']==='activo' || $u['estado']==='ACTIVO'): ?>
