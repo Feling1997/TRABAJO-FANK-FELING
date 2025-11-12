@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/base_datos.php';
+require_once __DIR__ . '/../config/base_datos.php';
 session_start();
 if (!isset($_SESSION["usuario_id"])) {
   header("Location: ../login.php");
@@ -15,7 +15,7 @@ if (!empty($_GET['ok'])) {
 }
 
 $res = $conexion->query("
-  SELECT id, nombre, email, tel, dni, direccion, estado
+  SELECT id, nombre_completo, email, telefono, dni, direccion, estado
   FROM usuarios
   ORDER BY id DESC
 ");
@@ -69,9 +69,9 @@ $usuarios = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
             <?php foreach ($usuarios as $u): ?>
               <tr>
                 <td><?= htmlspecialchars($u['id']) ?></td>
-                <td><?= htmlspecialchars($u['nombre']) ?></td>
+                <td><?= htmlspecialchars($u['nombre_completo']) ?></td>
                 <td><?= htmlspecialchars($u['email']) ?></td>
-                <td><?= htmlspecialchars($u['tel']) ?></td>
+                <td><?= htmlspecialchars($u['telefono']) ?></td>
                 <td><?= htmlspecialchars($u['dni']) ?></td>
                 <td><?= htmlspecialchars($u['direccion']) ?></td>
                 <td>

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/base_datos.php';
+require_once __DIR__ . '/../config/base_datos.php';
 session_start();
 if (!isset($_SESSION["usuario_id"])) {
   header("Location: ../login.php");
@@ -12,9 +12,8 @@ if ($id <= 0) { header("Location: index.php"); exit; }
 
 $errores = [];
 
-// Cargar datos actuales
 $u = null;
-$stmt = $conexion->prepare("SELECT id, nombre, email, tel, dni, direccion, estado FROM usuarios WHERE id = ? LIMIT 1");
+$stmt = $conexion->prepare("SELECT id, nombre_completo, email, telefono, dni, direccion, estado FROM usuarios WHERE id = ? LIMIT 1");
 if ($stmt) {
   $stmt->bind_param("i", $id);
   $stmt->execute();
@@ -25,9 +24,9 @@ if ($stmt) {
 if (!$u) { header("Location: index.php"); exit; }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $nombre = trim($_POST["nombre"] ?? '');
+  $nombre = trim($_POST["nombre_completo"] ?? '');
   $email = trim($_POST["email"] ?? '');
-  $tel = trim($_POST["tel"] ?? '');
+  $tel = trim($_POST["telefono"] ?? '');
   $dni = trim($_POST["dni"] ?? '');
   $direccion = trim($_POST["direccion"] ?? '');
   $estado = isset($_POST["estado"]) ? (int)$_POST["estado"] : 1;
@@ -39,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (!$errores) {
     $stmt = $conexion->prepare("
       UPDATE usuarios
-      SET nombre=?, email=?, tel=?, dni=?, direccion=?, estado=?
+      SET nombre_completo=?, email=?, telefono=?, dni=?, direccion=?, estado=?
       WHERE id = ?
     ");
     if ($stmt) {
@@ -53,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
   } else {
     $u = array_merge($u, [
-      "nombre"=>$nombre, "email"=>$email, "tel"=>$tel,
+      "nombre_completo"=>$nombre, "email"=>$email, "telefono"=>$tel,
       "dni"=>$dni, "direccion"=>$direccion, "estado"=>$estado
     ]);
   }
@@ -89,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <form method="post" class="row g-3">
               <div class="col-12">
                 <label class="form-label">Nombre</label>
-                <input name="nombre" class="form-control" value="<?= htmlspecialchars($u['nombre']) ?>" required>
+                <input name="nombre_completo" class="form-control" value="<?= htmlspecialchars($u['nombre_completo']) ?>" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Email</label>
@@ -97,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               </div>
               <div class="col-md-6">
                 <label class="form-label">Teléfono</label>
-                <input name="tel" class="form-control" value="<?= htmlspecialchars($u['tel']) ?>">
+                <input name="telefono" class="form-control" value="<?= htmlspecialchars($u['telefono']) ?>">
               </div>
               <div class="col-md-6">
                 <label class="form-label">DNI</label>

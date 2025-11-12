@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/base_datos.php';
+require_once __DIR__ . '/../config/base_datos.php';
 session_start();
 if (!isset($_SESSION["usuario_id"])) {
   header("Location: ../login.php");
@@ -10,9 +10,9 @@ if (!isset($_SESSION["usuario_id"])) {
 $errores = [];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $nombre = trim($_POST["nombre"] ?? '');
+  $nombre = trim($_POST["nombre_completo"] ?? '');
   $email = trim($_POST["email"] ?? '');
-  $tel = trim($_POST["tel"] ?? '');
+  $tel = trim($_POST["telefono"] ?? '');
   $dni = trim($_POST["dni"] ?? '');
   $direccion = trim($_POST["direccion"] ?? '');
   $estado = isset($_POST["estado"]) ? (int)$_POST["estado"] : 1;
@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
   if (!$errores) {
     $stmt = $conexion->prepare("
-      INSERT INTO usuarios (nombre, email, tel, dni, direccion, estado)
+      INSERT INTO usuarios (nombre_completo, email, telefono, dni, direccion, estado)
       VALUES (?, ?, ?, ?, ?, ?)
     ");
     if ($stmt) {
@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <form method="post" class="row g-3">
               <div class="col-12">
                 <label class="form-label">Nombre</label>
-                <input name="nombre" class="form-control" required>
+                <input name="nombre_completo" class="form-control" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Email</label>
@@ -76,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               </div>
               <div class="col-md-6">
                 <label class="form-label">Teléfono</label>
-                <input name="tel" class="form-control">
+                <input name="telefono" class="form-control">
               </div>
               <div class="col-md-6">
                 <label class="form-label">DNI</label>

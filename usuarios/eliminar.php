@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/base_datos.php';
+require_once __DIR__ . '/../config/base_datos.php';
 session_start();
 if (!isset($_SESSION["usuario_id"])) {
   header("Location: ../login.php");

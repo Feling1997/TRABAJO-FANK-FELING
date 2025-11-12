@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/config/base_datos.php';
+require_once __DIR__ . '/../config/base_datos.php';
 session_start();
 if (!isset($_SESSION["usuario_id"])) {
   header("Location: ../login.php");
@@ -10,9 +10,8 @@ if (!isset($_SESSION["usuario_id"])) {
 $id = isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 if ($id <= 0) { header("Location: index.php"); exit; }
 
-// Datos del usuario
 $u = null;
-$stmt = $conexion->prepare("SELECT id, nombre, email, tel, dni, direccion, estado FROM usuarios WHERE id = ? LIMIT 1");
+$stmt = $conexion->prepare("SELECT id, nombre_completo, email, telefono, dni, direccion, estado FROM usuarios WHERE id = ? LIMIT 1");
 if ($stmt) {
   $stmt->bind_param("i", $id);
   $stmt->execute();
@@ -22,7 +21,6 @@ if ($stmt) {
 }
 if (!$u) { header("Location: index.php"); exit; }
 
-// Préstamos del usuario
 $prestamos = [];
 $stmt2 = $conexion->prepare("
   SELECT p.id, p.fecha_prestamo, p.fecha_devolucion, p.fecha_dev_real, p.estado, p.observaciones,
