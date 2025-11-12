@@ -1,5 +1,5 @@
 <?php
-include_once("./config/base_datos.php");
+include_once("../config/base_datos.php");
 
 $totalLibros = $conexion->query("SELECT COUNT(*) AS total FROM libros")->fetch_assoc()["total"];
 $totalPrestamos = $conexion->query("SELECT COUNT(*) AS total FROM prestamos WHERE estado='activo'")->fetch_assoc()["total"];
@@ -17,6 +17,10 @@ $totalUsuarios = $conexion->query("SELECT COUNT(*) AS total FROM usuarios")->fet
 <body class="bg-light">
 <div class="container mt-5">
     <h2 class="text-center text-primary mb-4">📊 Panel de Estadísticas</h2>
+    <class="text-center my-4">
+        <a href="libros/listar_libros.php" class="btn btn-primary btn.lg m-2">📚 Ver Libros</a>
+        <a href="prestamos/listar_prestamos.php" class="btn btn-success btn.lg m-2">📘 Ver Préstamos</a>
+        <a href="#" class="btn btn-warning btn.lg m-2 disabled">👤 Ver Usuarios</a>
 
     <div class="row text-center mb-4">
         <div class="col-md-4">
@@ -49,7 +53,6 @@ $totalUsuarios = $conexion->query("SELECT COUNT(*) AS total FROM usuarios")->fet
 </div>
 
 <script>
-// ✅ Gráfico dinámico con Chart.js
 function cargarGrafico() {
     const ctx = document.getElementById("grafico");
     const datos = [<?= $totalLibros ?>, <?= $totalPrestamos ?>, <?= $totalUsuarios ?>];

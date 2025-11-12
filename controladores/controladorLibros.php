@@ -1,5 +1,5 @@
 <?php
-include_once("./config/base_datos.php");
+include_once("../../config/base_datos.php");
 
 class ControladorLibros{
     public static function obtenerLibros($conexion){
@@ -10,7 +10,7 @@ class ControladorLibros{
 
     public static function agregarLibro($conexion,$titulo,$autor,$anio,$genero,$stock, $isbn=null, $editorial=null, $categoria=null, $descripcion=null){
         $mensaje="";
-        //verificar que no exista un libro con ese isbn
+
         if($isbn!=null && $isbn!=""){
             $check=$conexion->prepare("SELECT id FROM libros WHERE isbn=? LIMIT 1");
             $check->bind_param("s",$isbn);
@@ -33,49 +33,74 @@ class ControladorLibros{
         return $mensaje;
     }
 
-    public static function editarLibro($conexion,$id,$titulo,$autor,$anio,$genero,$stock, $isbn=null, $editorial=null, $categoria=null, $descripcion=null, $estado='Disponible'){
-        $mensaje="";
+    public static function editarLibro($conexion, $id, $titulo, $autor, $anio, $genero, $stock, $isbn, $editorial, $categoria, $descripcion, $estado) {
+    $mensaje = "";
 
-        //verificar que no exista un libro con ese isbn
-        if($isbn!=null && $isbn!=""){
-            $check=$conexion->prepare("SELECT id FROM libros WHERE isbn=? LIMIT 1");
-            $check->bind_param("si",$isbn,$id);
-            $check->execute();
-            $resultado=$check->get_result();
+    $check = $conexion->prepare("SELECT id FROM libros WHERE id = ?");
+    $check->bind_param("i", $id);
+    $check->execute();
+    $resultado = $check->get_result();
 
-            if($resultado->num_rows>0)
-                $mensaje= "Ya existe un libro con ese isbn";
-        }
-        if($mensaje==""){
-            $consulta="UPDATE libros SET titulo=?, autor=?, anio_publicacion=?, genero=?, stock=?, isbn=?, editorial=?, categoria=?, descripcion=?, estado=? WHERE id=?";
-            $preparacion=$conexion->prepare($consulta);
-            $preparacion->bind_param("ssisiissssi",$titulo,$autor,$anio,$genero,$stock,$isbn,$editorial,$categoria,$descripcion,$estado,$id);
-            
-            if($preparacion->execute())
-                $mensje="Ok";
-            else
-                $mensaje="Error al editar el libro".$preparacion->error;
-        }
-        return $mensaje;   
+    if ($resultado->num_rows == 0) {
+        return "El libro no existe.";
     }
+
+    $consulta = "UPDATE libros 
+                 SET titulo = ?, 
+                     autor = ?, 
+                     anio_publicacion = ?, 
+                     genero = ?, 
+                     stock = ?, 
+                     isbn = ?, 
+                     editorial = ?, 
+                     categoria = ?, 
+                     descripcion = ?, 
+                     estado = ?
+                 WHERE id = ?";
+
+    $stmt = $conexion->prepare($consulta);
+    $stmt->bind_param(
+        "ssisiissssi",
+        $titulo,
+        $autor,
+        $anio,
+        $genero,
+        $stock,
+        $isbn,
+        $editorial,
+        $categoria,     
+        $descripcion,   
+        $estado,        
+        $id             
+    );
+
+    if ($stmt->execute()) {
+        $mensaje = "OK";
+    } else {
+        $mensaje = "Error al actualizar libro: " . $stmt->error;
+    }
+
+    return $mensaje;
+}
+
 
     public static function eliminarLibro($conexion,$id){
         $mensaje="";
 
-        $check=$conexion->prepare("SELECT id FROM libros WHERE id=?");  
+        $check=$conexion->prepare("SELECT id FROM prestamos WHERE libro_id=?");  
         $check->bind_param("i",$id);
         $check->execute();
         $resultado=$check->get_result();
 
         if($resultado->num_rows>0)
-            $mensaje= "El libro no puede ser eliminado porque tiene prestamos pendientes";
+            $mensaje= "El libro no puede ser eliminado porque tiene registros pendientes, primero elimine los registros de prestamos pendientes";
 
         if($mensaje==""){
             $preparacion=$conexion->prepare("DELETE FROM libros WHERE id=?");
             $preparacion->bind_param("i",$id);
 
             if($preparacion->execute())
-                $mensje="Ok";
+                $mensaje="Ok";
             else
                 $mensaje="Error al eliminar el libro".$preparacion->error;
         }

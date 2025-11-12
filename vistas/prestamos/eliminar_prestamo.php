@@ -1,6 +1,6 @@
 <?php
-include_once("../config/base_datos.php");
-include_once("../controladores/controladorPrestamos.php");
+include_once("../../config/base_datos.php");
+include_once("../../controladores/controladorPrestamos.php");
 
 $id = isset($_GET["id"]) ? (int) $_GET["id"] : 0;
 $mensaje = "";

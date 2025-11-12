@@ -11,9 +11,21 @@ function validarFormulario(){
     return respuesta;
 }
 
-function confirmarEliminacion(){
-    return confirm('¿Seguro que deseas eliminar este libro?');
+function confirmarEliminacion() {
+    return confirm("¿Seguro que deseas eliminar?");
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    const rows = document.querySelectorAll("#tablaPrestamos tbody tr");
+    rows.forEach((row, i) => {
+        row.style.opacity = 0;
+        setTimeout(() => {
+            row.style.transition = "opacity 0.6s ease";
+            row.style.opacity = 1;
+        }, 80 * i);
+    });
+});
+
 
 function ocultarMensaje(){
     const mensaje = document.getElementById("mensaje");
