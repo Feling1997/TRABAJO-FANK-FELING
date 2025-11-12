@@ -99,11 +99,30 @@ $usuarios = $res ? $res->fetch_all(MYSQLI_ASSOC) : [];
   </div>
 
 <script>
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  for (const tr of document.querySelectorAll('#tabla tbody tr')) {
+    const idCelda = tr.querySelector('td:first-child'); // primera columna
+    if (!idCelda) continue;
+
+    const id = idCelda.textContent.trim();
+    if (id === '1') {  
+      tr.style.display = 'none';
+    }
+  }
+});
+
+
 function filtrar() {
-  const q = document.getElementById('q').value.toLowerCase();
+  const q = document.getElementById('q')?.value.toLowerCase() || '';
+
   for (const tr of document.querySelectorAll('#tabla tbody tr')) {
     const texto = tr.innerText.toLowerCase();
-    tr.style.display = texto.includes(q) ? '' : 'none';
+    const id = tr.querySelector('td:first-child')?.textContent.trim();
+    const esAdmin = id === '1';
+
+    tr.style.display = (texto.includes(q) && !esAdmin) ? '' : 'none';
   }
 }
 function confirmarEliminar(id) {

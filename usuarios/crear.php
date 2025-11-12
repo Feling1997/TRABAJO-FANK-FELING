@@ -15,8 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   $tel = trim($_POST["telefono"] ?? '');
   $dni = trim($_POST["dni"] ?? '');
   $direccion = trim($_POST["direccion"] ?? '');
-  $estado = isset($_POST["estado"]) ? (int)$_POST["estado"] : 1;
-
+  $estado = 0;
   if ($nombre === '') $errores[] = "El nombre es obligatorio.";
   if ($email === '') $errores[] = "El email es obligatorio.";
   if ($dni === '') $errores[] = "El DNI es obligatorio.";
@@ -85,13 +84,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
               <div class="col-md-6">
                 <label class="form-label">Dirección</label>
                 <input name="direccion" class="form-control">
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Estado</label>
-                <select name="estado" class="form-select">
-                  <option value="1">Activo</option>
-                  <option value="0">Inactivo</option>
-                </select>
               </div>
 
               <div class="col-12 d-flex justify-content-end gap-2 mt-2">
