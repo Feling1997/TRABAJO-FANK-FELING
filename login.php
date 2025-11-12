@@ -1,83 +1,79 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
 require_once __DIR__ . '/config/base_datos.php';
+session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $usuario = trim($_POST['usuario'] ?? '');
-    $pass    = trim($_POST['pass'] ?? '');
+$error = null;
 
-    if ($usuario === '' || $pass === '') {
-        echo 'error';
-        exit;
-    }
+// Si ya está logueado, redirige al dashboard
+if (isset($_SESSION["usuario_id"])) {
+  header("Location: dashboard.php");
+  exit;
+}
 
-    $stmt = $conexion->prepare("SELECT id, usuario, password FROM usuarios_sistema WHERE usuario=? LIMIT 1");
-    $stmt->bind_param('s', $usuario);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+  $usuario  = trim($_POST["usuario"]  ?? '');
+  $password = trim($_POST["password"] ?? '');
+
+  if ($usuario !== '' && $password !== '') {
+    $stmt = $conexion->prepare("
+      SELECT id, usuario, password, rol
+      FROM usuarios_sistema
+      WHERE usuario = ?
+      LIMIT 1
+    ");
+    $stmt->bind_param("s", $usuario);
     $stmt->execute();
     $res  = $stmt->get_result();
     $user = $res->fetch_assoc();
 
-    if ($user && password_verify($pass, $user['password'])) {
-        $_SESSION['usuario_id'] = (int)$user['id'];
-        $_SESSION['usuario']    = $user['usuario'];
-        echo 'ok';
+    if ($user && password_verify($password, $user["password"])) {
+      $_SESSION["usuario_id"] = (int)$user["id"];
+      $_SESSION["usuario"]    = $user["usuario"];
+      $_SESSION["rol"]        = $user["rol"];
+      header("Location: dashboard.php");
+      exit;
     } else {
-        echo 'error';
+      $error = "Usuario o contraseña incorrectos.";
     }
-    exit;
+  } else {
+    $error = "Completá ambos campos.";
+  }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Login</title>
-<link rel="stylesheet" href="style.css">
-<style>
-  .center { max-width: 420px; margin: 40px auto; }
-  .form-row { margin: 10px 0; }
-  .form-row label { display:block; margin-bottom:6px; }
-  .full { width:100%; padding:8px; }
-  .error-msg { color:#c0392b; margin:8px 0 0; }
-  button { padding:10px 14px; cursor:pointer; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iniciar sesión - Biblioteca</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(135deg,#2b5876,#4e4376); height:100vh; display:flex; align-items:center; justify-content:center; }
+    .login-card { background:#fff; border-radius:16px; box-shadow:0 0 20px rgba(0,0,0,.3); width:100%; max-width:380px; padding:2rem; }
+    .btn-primary { background:#4e4376; border:none; } 
+    .btn-primary:hover{ background:#2b5876; }
+  </style>
 </head>
 <body>
-  <div class="center">
-    <h2>Login</h2>
+  <form method="POST" class="login-card">
+    <h3 class="text-center mb-3">📚 Biblioteca IAES</h3>
 
-    <div class="form-row">
-      <label for="usuario">Usuario</label>
-      <input id="usuario" class="full" placeholder="Tu usuario">
+    <?php if ($error): ?>
+      <div class="alert alert-danger text-center py-2"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+
+    <div class="mb-3">
+      <label class="form-label">Usuario</label>
+      <input type="text" name="usuario" class="form-control" required autofocus>
     </div>
 
-    <div class="form-row">
-      <label for="pass">Contraseña</label>
-      <input id="pass" class="full" type="password" placeholder="Contraseña">
+    <div class="mb-3">
+      <label class="form-label">Contraseña</label>
+      <input type="password" name="password" class="form-control" required>
     </div>
 
-    <div class="form-row">
-      <button onclick="login()">Entrar</button>
-      <p id="msg" class="error-msg"></p>
-    </div>
-  </div>
-
-<script>
-async function login() {
-  const data = new FormData();
-  data.append("usuario", document.querySelector("#usuario").value.trim());
-  data.append("pass", document.querySelector("#pass").value);
-
-  const res = await fetch("login.php", { method: "POST", body: data });
-  const txt = await res.text();
-
-  if (txt.trim() === "ok") {
-    location.href = "dashboard.php";
-  } else {
-    document.querySelector("#msg").textContent = "Credenciales incorrectas";
-  }
-}
-</script>
+    <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+    <p class="text-center mt-3 mb-0 text-muted" style="font-size:.9rem;">© 2025 - Sistema de Biblioteca</p>
+  </form>
 </body>
 </html>
